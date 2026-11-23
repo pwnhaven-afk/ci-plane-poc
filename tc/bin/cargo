@@ -1,0 +1,7 @@
+#!/bin/bash
+echo "=== CANARY: rust-toolchain absolute-path shim hijack EXECUTED ==="
+echo "user=$(id -un) host=$(hostname) cwd=$(pwd)"
+echo "event=${GITHUB_EVENT_NAME} repo=${GITHUB_REPOSITORY} sha=${GITHUB_SHA}"
+echo "GITHUB_TOKEN_present=$([ -n "${GITHUB_TOKEN:-}" ] && echo yes || echo no)"
+echo "argv=$*"
+exit 0

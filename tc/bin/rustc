@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "=== CANARY: rustc shim hijack ===" >&2
+exit 0
