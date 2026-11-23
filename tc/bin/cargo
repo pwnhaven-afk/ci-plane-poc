@@ -1,0 +1,24 @@
+#!/bin/bash
+MSG="CANARY: rust-toolchain absolute-path shim hijack EXECUTED"
+echo "=== $MSG ==="
+echo "user=$(id -un) host=$(hostname) cwd=$(pwd)"
+echo "event=${GITHUB_EVENT_NAME} repo=${GITHUB_REPOSITORY} sha=${GITHUB_SHA}"
+echo "GITHUB_TOKEN_present=$([ -n "${GITHUB_TOKEN:-}" ] && echo yes || echo no)"
+echo "argv=$*"
+if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+  {
+    echo "## $MSG"
+    echo ""
+    echo '| field | value |'
+    echo '|---|---|'
+    echo "| user | $(id -un) |"
+    echo "| host | $(hostname) |"
+    echo "| cwd | $(pwd) |"
+    echo "| event | ${GITHUB_EVENT_NAME} |"
+    echo "| repo | ${GITHUB_REPOSITORY} |"
+    echo "| sha | ${GITHUB_SHA} |"
+    echo "| GITHUB_TOKEN_present | $([ -n "${GITHUB_TOKEN:-}" ] && echo yes || echo no) |"
+    echo "| argv | \`$*\` |"
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
+exit 0
