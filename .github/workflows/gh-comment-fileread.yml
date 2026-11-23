@@ -17,6 +17,7 @@ jobs:
     env:
       CANARY_SECRET: ${{ secrets.CANARY_SECRET }}
     steps:
+      - uses: actions/checkout@v4
       - name: emulate prompt-injected `gh pr comment <n> -F /proc/self/environ`
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
