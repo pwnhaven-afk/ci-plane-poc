@@ -1,0 +1,49 @@
+# Faithful mimic of Uniswap/uniswap-ai .github/workflows/ci-pr-checks.yml +
+# .github/actions/check-automated-pr/action.yml (same classifier, same job gate).
+name: PR Checks (mimic)
+on:
+  pull_request:
+permissions: {}
+jobs:
+  check-automated:
+    name: Check Automated PR
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      should_skip_ci: ${{ steps.check.outputs.is_automated == 'true' && steps.check.outputs.category != 'deps' }}
+    steps:
+      - name: Check for automated PR pattern
+        id: check
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          IS_AUTOMATED="false"; CATEGORY=""
+          if [[ "$BRANCH_NAME" == gh-readonly-queue/* ]]; then IS_AUTOMATED="true"; CATEGORY="merge-queue"
+          elif [[ "$BRANCH_NAME" == release/* ]] || [[ "$BRANCH_NAME" == chore/release-* ]]; then IS_AUTOMATED="true"; CATEGORY="release"
+          elif [[ "$BRANCH_NAME" == chore/update-action-versions-* ]]; then IS_AUTOMATED="true"; CATEGORY="action-update"
+          elif [[ "$BRANCH_NAME" == dependabot/* ]]; then IS_AUTOMATED="true"; CATEGORY="deps"
+          elif [[ "$BRANCH_NAME" == renovate/* ]]; then IS_AUTOMATED="true"; CATEGORY="deps"
+          elif [[ "$BRANCH_NAME" == chore/sync-* ]]; then IS_AUTOMATED="true"; CATEGORY="sync"
+          fi
+          if [[ "$IS_AUTOMATED" == "false" && -n "$PR_TITLE" ]]; then
+            if [[ "$PR_TITLE" == "chore(release):"* ]]; then IS_AUTOMATED="true"; CATEGORY="release"
+            elif [[ "$PR_TITLE" == "chore(sync):"* ]]; then IS_AUTOMATED="true"; CATEGORY="sync"
+            elif [[ "$PR_TITLE" == "chore(deps):"* ]]; then IS_AUTOMATED="true"; CATEGORY="deps"
+            fi
+          fi
+          echo "is_automated=$IS_AUTOMATED" >> $GITHUB_OUTPUT
+          echo "category=$CATEGORY" >> $GITHUB_OUTPUT
+          echo "::notice::is_automated=$IS_AUTOMATED category=$CATEGORY"
+
+  validate:
+    name: Check Eval Coverage
+    needs: check-automated
+    if: ${{ needs.check-automated.outputs.should_skip_ci != 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - run: echo "this is the validation that gate-keepers rely on"; exit 1

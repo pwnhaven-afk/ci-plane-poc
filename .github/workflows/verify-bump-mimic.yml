@@ -1,0 +1,22 @@
+# Faithful mimic of anza-xyz/agave/.github/workflows/verify-bump.yml
+# (job gate + exact cargo install command), nothing else.
+name: verify-bump-mimic
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  verify-bump:
+    if: startsWith(github.head_ref, 'version-bump-')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: install anza-xtask
+        run: |
+          cargo install anza-xtask@0.2.7 --locked
+      - name: post
+        run: echo "install step returned"
